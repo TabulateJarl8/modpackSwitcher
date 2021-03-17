@@ -1,6 +1,6 @@
 *.jar
 *.iml
-paths/
+packs/
 *.class
 build
 .idea/
