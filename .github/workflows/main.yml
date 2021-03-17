@@ -12,9 +12,9 @@ jobs:
         run: |
           sudo apt install -y default-jre maven
           mvn package
-          mv target/switcher*.jar ./
+          mv target/switcher*.jar ./switcher.jar
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: switcher.jar
-          path: switcher*.jar
+          path: switcher.jar
