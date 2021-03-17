@@ -7,9 +7,6 @@ import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -54,7 +51,7 @@ public class Main {
         String[] modpacks;
         String stringChoice;
         String line;
-        String jarPath = null;
+        String jarCommand = null;
         String selectedPackDir;
         int exitCode;
         int choice;
@@ -109,10 +106,10 @@ public class Main {
 
             choice = Integer.parseInt(stringChoice);
 
-            // Read `switcher-jarname.txt` file in selected modpack directory to find the correct jar to execute
+            // Read `modpackswitcher.txt` file in selected modpack directory to find the correct jar to execute
             selectedPackDir = absolutePath + "/" + modpacks[choice - 1] + "/";
             try {
-                BufferedReader br = new BufferedReader(new FileReader(selectedPackDir + "switcher-jarname.txt"));
+                BufferedReader br = new BufferedReader(new FileReader(selectedPackDir + "modpackswitcher.txt"));
                 StringBuilder sb = new StringBuilder();
                 line = br.readLine();
                 while (line != null) {
@@ -120,18 +117,28 @@ public class Main {
                     sb.append(System.lineSeparator());
                     line = br.readLine();
                 }
-                jarPath = sb.toString().trim();
+                jarCommand = sb.toString().trim();
             } catch (FileNotFoundException e) {
-                System.out.println(ansi ? Fore.RED + "Fatal error. File " + Fore.WHITE + "\"" + selectedPackDir + "switcher-jarname.txt" + "\"" + Fore.RED + " not found." + Fore.RESET : "File \"" + selectedPackDir + "switcher-jarname.txt" + "\" not found.");
+                System.out.println(ansi ? Fore.RED + "Fatal error. File " + Fore.WHITE + "\"" + selectedPackDir + "modpackswitcher.txt" + "\"" + Fore.RED + " not found." + Fore.RESET : "File \"" + selectedPackDir + "modpackswitcher.txt" + "\" not found.");
                 System.exit(1);
             } catch (IOException e) {
                 System.out.println(ansi ? Fore.RED + "Fatal error\n" + Fore.RESET : "Fatal error\n");
                 e.printStackTrace();
                 System.exit(1);
             }
+//            try {
+//                Ini ini = new Ini(new File(selectedPackDir + "modpackswitcher.ini"));
+//                Preferences config = new IniPreferences(ini);
+//            } catch (InvalidFileFormatException e){
+//                System.out.println(ansi ? Fore.RED + "Fatal error. Invalid format in file " + Fore.WHITE + "\"" + selectedPackDir + "modpackswitcher.ini" + "\"" + Fore.RESET : "Fatal error. Invalid format in file \"" + selectedPackDir + "modpackswitcher.ini" + "\"");
+//                System.exit(1);
+//            } catch (IOException e) {
+//                System.out.println(ansi ? Fore.RED + "Fatal error. File " + Fore.WHITE + "\"" + selectedPackDir + "modpackswitcher.ini" + "\"" + Fore.RED + " not found." + Fore.RESET : "File \"" + selectedPackDir + "modpackswitcher.ini" + "\" not found.");
+//                System.exit(1);
+//            }
 
             try {
-                ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "cd \"" + selectedPackDir + "\" && java -jar \"" + jarPath + "\"");
+                ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "cd \"" + selectedPackDir + "\" && " + jarCommand);
                 Process process = processBuilder.start();
                 exitCode = process.waitFor();
                 if (exitCode == 0)
