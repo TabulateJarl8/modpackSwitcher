@@ -26,7 +26,7 @@ packs
 └── switcher.jar
 ```
 
-Now, inside of each of those modpack folders (in out case `funny` and `sevtech`), you are going to want to create a file called `modpackswitcher.txt`. Inside of this file you are going to want to put the command used to launch the server, which can usually be found in the README of the modpack. In this case, we'll say that to start funny, you need to just use `java -jar forge-1.12.2-server.jar`, so that's exactly what goes in the `modpackswitcher.txt` file. For Sevtech: Ages, you need to first run the install script and then the start script. There are 2 ways to accomplish this.
+Now, inside of each of those modpack folders (in our case `funny` and `sevtech`), you are going to want to create a file called `modpackswitcher.txt`. Inside of this file you are going to want to put the command used to launch the server, which can usually be found in the README of the modpack. In this case, we'll say that to start funny, you need to just use `java -jar forge-1.12.2-server.jar`, so that's exactly what goes in the `modpackswitcher.txt` file. For Sevtech: Ages, you need to first run the install script and then the start script. There are 2 ways to accomplish this.
 1. You can run the install script locally and transfer those files to the server
 2. You can set the command in `modpackswitcher.txt` to `sh Install.sh`, start the server, and then after it's done installing, stop the server and change the command to `sh StartServer.sh`.
 
