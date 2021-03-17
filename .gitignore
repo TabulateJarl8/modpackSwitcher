@@ -1,0 +1,6 @@
+*.jar
+*.iml
+paths/
+*.class
+build
+.idea/
