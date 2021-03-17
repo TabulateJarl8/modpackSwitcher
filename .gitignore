@@ -2,5 +2,7 @@
 *.iml
 packs/
 *.class
-build
+run
 .idea/
+target/
+dependency-reduced-pom.xml
