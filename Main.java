@@ -7,7 +7,7 @@ import java.util.Arrays;
 public class Main {
 
     public static void main(String[] args) {
-        String absolutePath = FileSystems.getDefault().getPath("paths").normalize().toAbsolutePath().toString();
+        String absolutePath = FileSystems.getDefault().getPath("packs").normalize().toAbsolutePath().toString();
         boolean packsDirExists = Files.exists(Paths.get(absolutePath));
         if (packsDirExists){
 
@@ -19,7 +19,7 @@ public class Main {
             System.out.println(Arrays.toString(modpacks));
 
         } else {
-            System.out.println(Fore.RED + "\"paths\" directory not found." + Fore.RESET);
+            System.out.println(Fore.RED + "\"packs\" directory not found." + Fore.RESET);
             System.exit(1);
         }
     }

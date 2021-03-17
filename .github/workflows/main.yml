@@ -14,7 +14,8 @@ jobs:
           javac Main.java
           jar cvfe switcher.jar Main *.class
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: softprops/action-gh-release@v1
         with:
-          name: switcher.jar
-          path: switcher.jar
+          files: switcher.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
