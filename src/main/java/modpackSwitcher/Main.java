@@ -1,9 +1,12 @@
 package modpackSwitcher;
 
+import sun.awt.X11.XSystemTrayPeer;
+
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.*;
 
@@ -25,6 +28,42 @@ public class Main {
                 System.out.println("  -h, --help     show this help message and exit");
 //                System.out.println("  -V, --version  Print the program version and exit");
                 System.out.println("  -n, --no-ansi  Don't use ANSI Colors");
+                System.out.println("  -d, --debug    Show debug information and exit");
+                System.exit(0);
+            } else if (arg.equals("--debug") || arg.equals("-d")) {
+                System.out.println("--- MODPACKSWITCHER DEBUG START ---\n");
+
+                System.out.println("OS: " + System.getProperty("os.name") + " | " + System.getProperty("os.version") + " | " + System.getProperty("os.arch") + "\n");
+
+                String absolutePath = FileSystems.getDefault().getPath("packs").normalize().toAbsolutePath().toString();
+                System.out.println("packs directory in current directory: " + Files.exists(Paths.get(absolutePath)));
+                System.out.println("packs directory path: " + absolutePath);
+
+                File packsDir = new File(absolutePath);
+                String[] modpacks = packsDir.list(new FilenameFilter() {
+                    @Override
+                    public boolean accept(File file, String s) {
+                        return new File(file, s).isDirectory();
+                    }
+                });
+                System.out.println("packs directory contents: " + Arrays.toString(modpacks) + "\n");
+
+                System.out.print("Java: ");
+                try {
+                    Runtime rt = Runtime.getRuntime();
+                    Process proc = rt.exec("java -version");
+                    int exitVal = proc.waitFor();
+                    if (exitVal == 0) {
+                        System.out.println("yes");
+                        System.out.println("Version: " + System.getProperty("java.version"));
+                    } else {
+                        System.out.println("no");
+                    }
+                } catch (IOException | InterruptedException e) {
+                    System.out.println("no (IOException | InterruptedException)");
+                }
+
+                System.out.println("\n--- MODPACKSWITCHER DEBUG END ---");
                 System.exit(0);
             }
         }
