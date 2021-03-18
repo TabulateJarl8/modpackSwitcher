@@ -1,7 +1,7 @@
 package src.main.java.modpackSwitcher;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
+//import com.beust.jcommander.JCommander;
+//import com.beust.jcommander.Parameter;
 
 import java.io.*;
 import java.nio.file.FileSystems;
@@ -11,41 +11,45 @@ import java.util.Scanner;
 
 public class Main {
 
-    @Parameter(names = {"--no-ansi", "-n"})
-    public boolean ansi = true;
-
-    @Parameter(names = {"--help", "-h"})
-    public boolean help = false;
+//    @Parameter(names = {"--no-ansi", "-n"})
+//    public boolean ansi = true;
+//
+//    @Parameter(names = {"--help", "-h"})
+//    public boolean help = false;
 
 //    @Parameter(names = {"--version", "-V"})
 //    public boolean show_version = false;
 
-    public static void main(String ... argv) {
+    public static void main(String[] args) {
         // Parse args
         Main main = new Main();
-        JCommander.newBuilder()
-                .addObject(main)
-                .build()
-                .parse(argv);
+//        JCommander.newBuilder()
+//                .addObject(main)
+//                .build()
+//                .parse(argv);
 
-        if (main.help) {
-//            System.out.println("usage: switcher.jar [--version] [--help] [--no-ansi]");
-            System.out.println("usage: switcher.jar [--help] [--no-ansi]");
-            System.out.println();
-            System.out.println("optional arguments:");
-            System.out.println("  -h, --help     show this help message and exit");
-//            System.out.println("  -V, --version  Print the program version and exit");
-            System.out.println("  -n, --no-ansi  Don\'t use ANSI Colors");
-            System.exit(0);
-        }/* else if (main.show_version) {
+        boolean ansi = false;
+        for (int i = 0; i < args.length; i++){
+            if (args[i].equals("--no-ansi") || args[i].equals("-n")){
+                ansi = true;
+            } else if (args[i].equals("--help") || args[i].equals("-h")){
+//                System.out.println("usage: switcher.jar [--version] [--help] [--no-ansi]");
+                System.out.println("usage: switcher.jar [--help] [--no-ansi]");
+                System.out.println();
+                System.out.println("optional arguments:");
+                System.out.println("  -h, --help     show this help message and exit");
+//                System.out.println("  -V, --version  Print the program version and exit");
+                System.out.println("  -n, --no-ansi  Don\'t use ANSI Colors");
+                System.exit(0);
+            }
+        }
 
-        }*/
 
-        main.run();
+        main.run(ansi);
 
         }
 
-    public void run() {
+    public void run(boolean ansi) {
 
         String absolutePath;
         String[] modpacks;
@@ -108,34 +112,15 @@ public class Main {
 
             // Read `modpackswitcher.txt` file in selected modpack directory to find the correct jar to execute
             selectedPackDir = absolutePath + "/" + modpacks[choice - 1] + "/";
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(selectedPackDir + "modpackswitcher.txt"));
-                StringBuilder sb = new StringBuilder();
-                line = br.readLine();
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }
-                jarCommand = sb.toString().trim();
-            } catch (FileNotFoundException e) {
+            jarCommand = readFile(selectedPackDir);
+            if (jarCommand.equals("FileNotFoundException")){
                 System.out.println(ansi ? Fore.RED + "Fatal error. File " + Fore.WHITE + "\"" + selectedPackDir + "modpackswitcher.txt" + "\"" + Fore.RED + " not found." + Fore.RESET : "File \"" + selectedPackDir + "modpackswitcher.txt" + "\" not found.");
                 System.exit(1);
-            } catch (IOException e) {
-                System.out.println(ansi ? Fore.RED + "Fatal error\n" + Fore.RESET : "Fatal error\n");
-                e.printStackTrace();
+            } else if (jarCommand.equals("IOException")) {
+                System.out.println(ansi ? Fore.RED + "Fatal error. IOException" + Fore.RESET : "Fatal error. IOException");
                 System.exit(1);
             }
-//            try {
-//                Ini ini = new Ini(new File(selectedPackDir + "modpackswitcher.ini"));
-//                Preferences config = new IniPreferences(ini);
-//            } catch (InvalidFileFormatException e){
-//                System.out.println(ansi ? Fore.RED + "Fatal error. Invalid format in file " + Fore.WHITE + "\"" + selectedPackDir + "modpackswitcher.ini" + "\"" + Fore.RESET : "Fatal error. Invalid format in file \"" + selectedPackDir + "modpackswitcher.ini" + "\"");
-//                System.exit(1);
-//            } catch (IOException e) {
-//                System.out.println(ansi ? Fore.RED + "Fatal error. File " + Fore.WHITE + "\"" + selectedPackDir + "modpackswitcher.ini" + "\"" + Fore.RED + " not found." + Fore.RESET : "File \"" + selectedPackDir + "modpackswitcher.ini" + "\" not found.");
-//                System.exit(1);
-//            }
+
 
             try {
                 ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "cd \"" + selectedPackDir + "\" && " + jarCommand);
@@ -163,6 +148,26 @@ public class Main {
             System.exit(1);
         }
 
+    }
+
+    public String readFile(String path){
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path + "modpackswitcher.txt"));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+            String jarCommand = sb.toString().trim();
+            return jarCommand;
+
+        } catch (FileNotFoundException e) {
+            return "FileNotFoundException";
+        } catch (IOException e) {
+            return "IOException";
+        }
     }
 }
 
