@@ -184,19 +184,14 @@ public class Main {
 
 
             try {
-                ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "cd \"" + selectedPackDir + "\" && " + jarCommand);
-                Process process = processBuilder.start();
+                System.out.println();
+                Process process = new ProcessBuilder("/bin/bash", "-c", "cd \"" + selectedPackDir + "\" && " + jarCommand).inheritIO().start();
                 exitCode = process.waitFor();
                 if (exitCode == 0)
                     System.exit(0);
                 else {
                     System.out.println(ansi ? Fore.RED + "Fatal error\n" + Fore.RESET : "Fatal error\n");
-                    try (final BufferedReader b = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                        if ((errorLine = b.readLine()) != null)
-                            System.out.println(errorLine);
-                    } catch (final IOException e) {
-                        e.printStackTrace();
-                    }
+                    System.exit(1);
                 }
             } catch (IOException | InterruptedException e) {
                 System.out.println(ansi ? Fore.RED + "Fatal error\n" + Fore.RESET : "Fatal error\n");
