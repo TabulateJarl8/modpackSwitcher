@@ -1,7 +1,4 @@
-package src.main.java.modpackSwitcher;
-
-//import com.beust.jcommander.JCommander;
-//import com.beust.jcommander.Parameter;
+package modpackSwitcher;
 
 import java.io.*;
 import java.nio.file.FileSystems;
@@ -12,35 +9,22 @@ import java.util.concurrent.*;
 
 public class Main {
 
-//    @Parameter(names = {"--no-ansi", "-n"})
-//    public boolean ansi = true;
-//
-//    @Parameter(names = {"--help", "-h"})
-//    public boolean help = false;
-
-//    @Parameter(names = {"--version", "-V"})
-//    public boolean show_version = false;
-
     public static void main(String[] args) {
         // Parse args
         Main main = new Main();
-//        JCommander.newBuilder()
-//                .addObject(main)
-//                .build()
-//                .parse(argv);
 
         boolean ansi = true;
-        for (int i = 0; i < args.length; i++){
-            if (args[i].equals("--no-ansi") || args[i].equals("-n")){
+        for (String arg : args) {
+            if (arg.equals("--no-ansi") || arg.equals("-n")) {
                 ansi = false;
-            } else if (args[i].equals("--help") || args[i].equals("-h")){
+            } else if (arg.equals("--help") || arg.equals("-h")) {
 //                System.out.println("usage: switcher.jar [--version] [--help] [--no-ansi]");
                 System.out.println("usage: switcher.jar [--help] [--no-ansi]");
                 System.out.println();
                 System.out.println("optional arguments:");
                 System.out.println("  -h, --help     show this help message and exit");
 //                System.out.println("  -V, --version  Print the program version and exit");
-                System.out.println("  -n, --no-ansi  Don\'t use ANSI Colors");
+                System.out.println("  -n, --no-ansi  Don't use ANSI Colors");
                 System.exit(0);
             }
         }
@@ -76,6 +60,11 @@ public class Main {
                 }
             });
 
+            if (modpacks != null && modpacks.length == 0) {
+                System.out.println(ansi ? Fore.RED + "Fatal Error. No modpack folders found in " + Fore.WHITE + "\"" + absolutePath + "\"" + Fore.RESET : "Fatal Error. No modpack folders found in \"" + absolutePath + "\"");
+                System.exit(1);
+            }
+
             // Read last used modpack from config
             lastUsedPackString = readFile("./mpswconfig.txt");
             if (lastUsedPackString.equals("FileNotFoundException")){
@@ -96,7 +85,7 @@ public class Main {
 
             // Print out modpack choices
             System.out.println("Select a pack. Last used pack will be started in 5 seconds.");
-            for (int i = 0; i < modpacks.length; i++) {
+            for (int i = 0; i < (modpacks.length); i++) {
                 System.out.print((i + 1) + ". " + modpacks[i]);
 
                 if (i == lastUsedPack) {
@@ -166,8 +155,7 @@ public class Main {
                 sb.append(System.lineSeparator());
                 line = br.readLine();
             }
-            String jarCommand = sb.toString().trim();
-            return jarCommand;
+            return sb.toString().trim();
 
         } catch (FileNotFoundException e) {
             return "FileNotFoundException";
@@ -206,14 +194,14 @@ public class Main {
                 return new Scanner(System.in).nextInt();
             }
         };
-        Long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         int choice = defaultChoice;
         boolean valid;
         ExecutorService l = Executors.newFixedThreadPool(1);
         Future<Integer> g;
         System.out.print("Which modpack? [1-" + modpacks.length + "] ");
         g = l.submit(k);
-        done: while (System.currentTimeMillis() - start < delay * 1000) {
+        done: while (System.currentTimeMillis() - start < delay * 1000L) {
             do {
                 valid = true;
                 if (g.isDone()) {

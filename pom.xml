@@ -65,7 +65,7 @@
               <manifest>
                 <addClasspath>true</addClasspath>
                 <classpathPrefix>lib</classpathPrefix>
-                <mainClass>src.main.java.modpackSwitcher.Main</mainClass>
+                <mainClass>modpackSwitcher.Main</mainClass>
               </manifest>
             </archive>
           </configuration>
