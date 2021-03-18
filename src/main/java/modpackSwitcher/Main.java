@@ -87,7 +87,6 @@ public class Main {
         String selectedPackDir;
         int exitCode;
         int choice;
-        String errorLine;
         String lastUsedPackString;
         int lastUsedPack;
         Ini config = null;
