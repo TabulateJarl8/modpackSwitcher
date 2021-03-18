@@ -6,4 +6,4 @@ run
 .idea/
 target/
 dependency-reduced-pom.xml
-mpswconfig.txt
+mpswconfig.ini

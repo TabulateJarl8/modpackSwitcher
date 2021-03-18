@@ -1,6 +1,9 @@
 package modpackSwitcher;
 
+import org.ini4j.Ini;
+
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -87,8 +90,31 @@ public class Main {
         String errorLine;
         String lastUsedPackString;
         int lastUsedPack;
+        Ini config = null;
 
-        absolutePath = FileSystems.getDefault().getPath("packs").normalize().toAbsolutePath().toString();
+
+        // Read last used modpack from config
+
+        try {
+            config = new Ini(new File("./mpswconfig.ini"));
+            lastUsedPackString = config.get("system", "lastusedpack");
+        } catch (IOException e) {
+            try {
+                // create file if it doesn't exist
+                if (writeFile("./", "mpswconfig.ini", "[system]\nlastusedpack = 0\nabsoluteworkingdir = " + new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent() + "/") != 0) {
+                    throw new IOException();
+                } else {
+                    config = new Ini(new File("./mpswconfig.ini"));
+                    lastUsedPackString = config.get("system", "lastusedpack");
+                }
+            } catch (IOException | URISyntaxException e2) {
+                File file = new File("./mpswconfig.ini");
+                System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on reading config file at " + Fore.WHITE + "\"" + file.getAbsoluteFile() + "\"" + Fore.RESET : "Warning: Error on reading config file at \"./mpswconfig.ini\"");
+                lastUsedPackString = "0";
+            }
+        }
+
+        absolutePath = config.get("system", "absoluteworkingdir") + "/packs";
         boolean packsDirExists = Files.exists(Paths.get(absolutePath));
         if (packsDirExists) {
 
@@ -107,21 +133,11 @@ public class Main {
                 System.exit(1);
             }
 
-            // Read last used modpack from config
-            lastUsedPackString = readFile("./mpswconfig.txt");
-            if (lastUsedPackString.equals("FileNotFoundException")){
-                lastUsedPackString = "0";
-            } else if (lastUsedPackString.equals("IOException")) {
-                File file = new File("./mpswconfig.txt");
-                System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on reading config file at " + Fore.WHITE + "\"" + file.getAbsoluteFile() + "\"" + Fore.RESET : "Warning: Error on reading config file at \"./mpswconfig.txt\"");
-                lastUsedPackString = "0";
-            }
-
             try {
                 lastUsedPack = Integer.parseInt(lastUsedPackString);
             } catch (NumberFormatException e) {
-                File file = new File("./mpswconfig.txt");
-                System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on reading config file at " + Fore.WHITE + "\"" + file.getAbsoluteFile() + "\"" + Fore.RESET : "Warning: Error on reading config file at \"./mpswconfig.txt\"");
+                File file = new File("./mpswconfig.ini");
+                System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on reading config file at " + Fore.WHITE + "\"" + file.getAbsoluteFile() + "\"" + Fore.RESET : "Warning: Error on reading config file at \"./mpswconfig.ini\"");
                 lastUsedPack = 0;
             }
 
@@ -142,14 +158,22 @@ public class Main {
             choice = Integer.parseInt(stringChoice);
 
             if (choice != lastUsedPack) {
-                if (writeFile("./", "mpswconfig.txt", String.valueOf(choice)) == 1){
-                    System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on writing config file at " + Fore.WHITE + "\"./mpswconfig.txt\"" + Fore.RESET : "Warning: Error on writing config file at \"./mpswconfig.txt\"");
+                config.put("system", "lastusedpack", choice);
+                try{
+                    File inioutfile = new File("./mpswconfig.ini");
+                    if (!inioutfile.exists()) {
+                            System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on writing config file at " + Fore.WHITE + "\"./mpswconfig.ini\"" + Fore.RESET : "Warning: Error on writing config file at \"./mpswconfig.ini\"");
+                    } else {
+                        config.store();
+                    }
+                } catch (IOException e){
+                    System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on writing config file at " + Fore.WHITE + "\"./mpswconfig.ini\"" + Fore.RESET : "Warning: Error on writing config file at \"./mpswconfig.ini\"");
                 }
             }
 
             // Read `modpackswitcher.txt` file in selected modpack directory to find the correct jar to execute
             selectedPackDir = absolutePath + "/" + modpacks[choice] + "/";
-            jarCommand = readFile(selectedPackDir);
+            jarCommand = readFile(selectedPackDir + "modpackswitcher.txt");
             if (jarCommand.equals("FileNotFoundException")){
                 System.out.println(ansi ? Fore.RED + "Fatal error. File " + Fore.WHITE + "\"" + selectedPackDir + "modpackswitcher.txt" + "\"" + Fore.RED + " not found." + Fore.RESET : "File \"" + selectedPackDir + "modpackswitcher.txt" + "\" not found.");
                 System.exit(1);
@@ -200,6 +224,7 @@ public class Main {
             return sb.toString().trim();
 
         } catch (FileNotFoundException e) {
+            System.out.println(path);
             return "FileNotFoundException";
         } catch (IOException e) {
             return "IOException";
