@@ -8,6 +8,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
+import java.util.concurrent.*;
 
 public class Main {
 
@@ -28,10 +29,10 @@ public class Main {
 //                .build()
 //                .parse(argv);
 
-        boolean ansi = false;
+        boolean ansi = true;
         for (int i = 0; i < args.length; i++){
             if (args[i].equals("--no-ansi") || args[i].equals("-n")){
-                ansi = true;
+                ansi = false;
             } else if (args[i].equals("--help") || args[i].equals("-h")){
 //                System.out.println("usage: switcher.jar [--version] [--help] [--no-ansi]");
                 System.out.println("usage: switcher.jar [--help] [--no-ansi]");
@@ -44,7 +45,6 @@ public class Main {
             }
         }
 
-
         main.run(ansi);
 
         }
@@ -54,12 +54,13 @@ public class Main {
         String absolutePath;
         String[] modpacks;
         String stringChoice;
-        String line;
-        String jarCommand = null;
+        String jarCommand;
         String selectedPackDir;
         int exitCode;
         int choice;
         String errorLine;
+        String lastUsedPackString;
+        int lastUsedPack;
 
         absolutePath = FileSystems.getDefault().getPath("packs").normalize().toAbsolutePath().toString();
         boolean packsDirExists = Files.exists(Paths.get(absolutePath));
@@ -75,43 +76,48 @@ public class Main {
                 }
             });
 
+            // Read last used modpack from config
+            lastUsedPackString = readFile("./mpswconfig.txt");
+            if (lastUsedPackString.equals("FileNotFoundException")){
+                lastUsedPackString = "0";
+            } else if (lastUsedPackString.equals("IOException")) {
+                File file = new File("./mpswconfig.txt");
+                System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on reading config file at " + Fore.WHITE + "\"" + file.getAbsoluteFile() + "\"" + Fore.RESET : "Warning: Error on reading config file at \"./mpswconfig.txt\"");
+                lastUsedPackString = "0";
+            }
+
+            try {
+                lastUsedPack = Integer.parseInt(lastUsedPackString);
+            } catch (NumberFormatException e) {
+                File file = new File("./mpswconfig.txt");
+                System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on reading config file at " + Fore.WHITE + "\"" + file.getAbsoluteFile() + "\"" + Fore.RESET : "Warning: Error on reading config file at \"./mpswconfig.txt\"");
+                lastUsedPack = 0;
+            }
+
             // Print out modpack choices
+            System.out.println("Select a pack. Last used pack will be started in 5 seconds.");
             for (int i = 0; i < modpacks.length; i++) {
                 System.out.print((i + 1) + ". " + modpacks[i]);
-                //Possible default config file
-                if (i == 0) {
-                    System.out.println(" (default)");
+
+                if (i == lastUsedPack) {
+                    System.out.println(ansi ? Fore.GREEN + " (last used)" + Fore.RESET : " (last used)");
                 } else {
                     System.out.println();
                 }
             }
             System.out.println();
-            Scanner input = new Scanner(System.in);
 
-            // While user input is invalid (not in range), ask them to choose a modpack
-            boolean valid = false;
-            stringChoice = "";
-            while (!valid) {
-                System.out.print("Which modpack? [1-" + modpacks.length + "] ");
-                stringChoice = input.nextLine();
-                try {
-                    if (stringChoice.isEmpty()) {
-                        stringChoice = "1";
-                        valid = true;
-                    } else if (Integer.parseInt(stringChoice) >= 1 && Integer.parseInt(stringChoice) <= modpacks.length) {
-                        valid = true;
-                    } else {
-                        System.out.println(ansi ? Fore.RED + "Please select a valid number.\n" + Fore.RESET : "Please select a valid number.\n");
-                    }
-                } catch (NumberFormatException e) {
-                    System.out.println(ansi ? Fore.RED + "Please select a valid number.\n" + Fore.RESET : "Please select a valid number.\n");
+            stringChoice = getModpackSelectionWithTimeout(5, lastUsedPack, modpacks, ansi);
+            choice = Integer.parseInt(stringChoice);
+
+            if (choice != lastUsedPack) {
+                if (writeFile("./", "mpswconfig.txt", String.valueOf(choice)) == 1){
+                    System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on writing config file at " + Fore.WHITE + "\"./mpswconfig.txt\"" + Fore.RESET : "Warning: Error on writing config file at \"./mpswconfig.txt\"");
                 }
             }
 
-            choice = Integer.parseInt(stringChoice);
-
             // Read `modpackswitcher.txt` file in selected modpack directory to find the correct jar to execute
-            selectedPackDir = absolutePath + "/" + modpacks[choice - 1] + "/";
+            selectedPackDir = absolutePath + "/" + modpacks[choice] + "/";
             jarCommand = readFile(selectedPackDir);
             if (jarCommand.equals("FileNotFoundException")){
                 System.out.println(ansi ? Fore.RED + "Fatal error. File " + Fore.WHITE + "\"" + selectedPackDir + "modpackswitcher.txt" + "\"" + Fore.RED + " not found." + Fore.RESET : "File \"" + selectedPackDir + "modpackswitcher.txt" + "\" not found.");
@@ -152,7 +158,7 @@ public class Main {
 
     public String readFile(String path){
         try {
-            BufferedReader br = new BufferedReader(new FileReader(path + "modpackswitcher.txt"));
+            BufferedReader br = new BufferedReader(new FileReader(path));
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
             while (line != null) {
@@ -169,6 +175,74 @@ public class Main {
             return "IOException";
         }
     }
+
+    public int writeFile(String directoryName, String fileName, String value){
+
+        File directory = new File(directoryName);
+        if (! directory.exists()){
+            directory.mkdir();
+            // If you require it to make the entire directory path including parents,
+            // use directory.mkdirs(); here instead.
+        }
+
+        File file = new File(directoryName + "/" + fileName);
+        try{
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(value);
+            bw.close();
+            return 0;
+        }
+        catch (IOException e){
+            return 1;
+        }
+    }
+
+    public String getModpackSelectionWithTimeout(int delay, int defaultChoice, String[] modpacks, boolean ansi){
+        defaultChoice++;
+        Callable<Integer> k = new Callable<Integer>() {
+            @Override
+            public Integer call() {
+                return new Scanner(System.in).nextInt();
+            }
+        };
+        Long start = System.currentTimeMillis();
+        int choice = defaultChoice;
+        boolean valid;
+        ExecutorService l = Executors.newFixedThreadPool(1);
+        Future<Integer> g;
+        System.out.print("Which modpack? [1-" + modpacks.length + "] ");
+        g = l.submit(k);
+        done: while (System.currentTimeMillis() - start < delay * 1000) {
+            do {
+                valid = true;
+                if (g.isDone()) {
+                    try {
+                        choice = g.get();
+                        if (choice >= 0 && choice <= modpacks.length) {
+                            if (choice == 0){
+                                choice = defaultChoice;
+                            }
+                            break done;
+                        } else {
+                            throw new IllegalArgumentException();
+                        }
+                    } catch (InterruptedException | ExecutionException | IllegalArgumentException e) {
+                        System.out.println(ansi ? Fore.RED + "Please select a valid number.\n" + Fore.RESET : "Please select a valid number.\n");
+                        g = l.submit(k);
+                        valid = false;
+                        // Reset timer
+                        System.out.print("Which modpack? [1-" + modpacks.length + "] ");
+                        start = System.currentTimeMillis();
+                    }
+                }
+            } while (!valid);
+        }
+
+        g.cancel(true);
+        return String.valueOf(choice - 1);
+    }
+
 }
 
 class Fore {
