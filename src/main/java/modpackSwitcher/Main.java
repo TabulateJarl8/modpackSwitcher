@@ -132,13 +132,12 @@ public class Main {
                 System.exit(1);
             }
 
-            try {
-                lastUsedPack = Integer.parseInt(lastUsedPackString);
-            } catch (NumberFormatException e) {
-                File file = new File("./mpswconfig.ini");
-                System.out.println(ansi ? Fore.YELLOW + "Warning:" + Fore.RESET + " Error on reading config file at " + Fore.WHITE + "\"" + file.getAbsoluteFile() + "\"" + Fore.RESET : "Warning: Error on reading config file at \"./mpswconfig.ini\"");
+            if (Arrays.asList(modpacks).contains(lastUsedPackString)) {
+                lastUsedPack = Arrays.asList(modpacks).indexOf(lastUsedPackString);
+            } else {
                 lastUsedPack = 0;
             }
+
 
             // Print out modpack choices
             System.out.println("Select a pack. Last used pack will be started in 5 seconds.");
@@ -156,8 +155,9 @@ public class Main {
             stringChoice = getModpackSelectionWithTimeout(5, lastUsedPack, modpacks, ansi);
             choice = Integer.parseInt(stringChoice);
 
+            // Write last used modpack if changed
             if (choice != lastUsedPack) {
-                config.put("system", "lastusedpack", choice);
+                config.put("system", "lastusedpack", modpacks[choice]);
                 try{
                     File inioutfile = new File("./mpswconfig.ini");
                     if (!inioutfile.exists()) {
@@ -218,7 +218,6 @@ public class Main {
             return sb.toString().trim();
 
         } catch (FileNotFoundException e) {
-            System.out.println(path);
             return "FileNotFoundException";
         } catch (IOException e) {
             return "IOException";

@@ -12,17 +12,19 @@ Modpack Switcher is a utility to allow you to easily switch between modpacks whi
 Modpack Switcher is fairly easy to use. First, download the latest artifact from [below](#artifactDownload), extract it, and place the jar in the main directory of your server. This directory will be the same one where the files for a modpack would go. Now create a directory called `packs` in the same folder as the jar. This directory will hold all of the directories for your modpacks, and you can put them there now. Here is an example structure.
 
 ```
-packs
-├── funny
-|   ├── forge-1.12.2-server.jar
-|   ├── server.properties
-|   └── ....
-├── sevtech
-|   ├── StartServer.sh
-|   ├── Install.sh
-|   ├── server.jar
-|   ├── server.properties
-|   └── ....
+.
+├── packs
+│   ├── funny
+│   │   ├── modpackswitcher.txt
+│   │   ├── forge-1.12.2-server.jar
+│   │   ├── server.properties
+│   │   └── ...
+│   └── rlcraft
+│       ├── Install.sh
+│       ├── modpackswitcher.txt
+│       ├── server.jar
+│       ├── StartServer.sh
+│       └── ...
 └── switcher.jar
 ```
 
@@ -30,7 +32,10 @@ Now, inside of each of those modpack folders (in our case `funny` and `sevtech`)
 1. You can run the install script locally and transfer those files to the server
 2. You can set the command in `modpackswitcher.txt` to `sh Install.sh`, start the server, and then after it's done installing, stop the server and change the command to `sh StartServer.sh`.
 
-Now, all you need to do is set the file that the server executes on start to `switcher.jar`, or whatever the name of the first file you downloaded is. This can be done on PloxHost via the control panel, but I cannot test other hosts.
+Now, all you need to do is set the file that the server executes on start to `switcher.jar`, or whatever the name of the first file you downloaded is. This can be done via the control panel on some hosts.
+
+## Configuration
+When you first run the switcher jar file, if there isn't a file called `mpswconfig.ini` in the current directory, the file will be created with the default values set. There is one option for the last used modpack, you probably won't need to change that as it's changed automatically, and there's an option for the absolute path of the working directory. This is useful if the switcher is incorrectly detecting the directory that you're in. To change this, just set it to the absolute path of the directory containing the `packs` directory.
 
 ## Download
 
