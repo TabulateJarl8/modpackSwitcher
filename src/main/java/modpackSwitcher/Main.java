@@ -86,12 +86,12 @@ public class Main {
 
                     System.out.println("OS: " + System.getProperty("os.name") + " | " + System.getProperty("os.version") + " | " + System.getProperty("os.arch") + "\n");
 
-                    String absolutePath = config.get("system", "absoluteworkingdir") + "/packs";
+                    absolutePath = config.get("system", "absoluteworkingdir") + "/packs";
                     System.out.println("packs directory in current directory: " + Files.exists(Paths.get(absolutePath)));
                     System.out.println("packs directory path: " + absolutePath);
 
                     File packsDir = new File(absolutePath);
-                    String[] modpacks = packsDir.list(new FilenameFilter() {
+                    modpacks = packsDir.list(new FilenameFilter() {
                         @Override
                         public boolean accept(File file, String s) {
                             return new File(file, s).isDirectory();
