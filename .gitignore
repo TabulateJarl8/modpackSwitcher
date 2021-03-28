@@ -7,3 +7,6 @@ run
 target/
 dependency-reduced-pom.xml
 mpswconfig.ini
+.classpath
+.project
+.settings/
