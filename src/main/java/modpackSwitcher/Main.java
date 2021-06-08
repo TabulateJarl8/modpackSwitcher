@@ -191,6 +191,7 @@ public class Main {
 
             try {
                 System.out.println();
+                System.out.println("Starting " + modpacks[choice] + "...");
                 Process process = new ProcessBuilder("/bin/bash", "-c", "cd \"" + selectedPackDir + "\" && " + jarCommand).inheritIO().start();
                 exitCode = process.waitFor();
                 if (exitCode == 0)
