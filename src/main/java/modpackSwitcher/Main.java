@@ -145,7 +145,7 @@ public class Main {
 
 
             // Print out modpack choices
-            System.out.println("Select a pack. Last used pack will be started in 5 seconds.");
+            System.out.println("Select a pack. Last used pack will be started in 10 seconds.");
             for (int i = 0; i < (modpacks.length); i++) {
                 System.out.print((i + 1) + ". " + modpacks[i]);
 
@@ -157,7 +157,9 @@ public class Main {
             }
             System.out.println();
 
-            stringChoice = getModpackSelectionWithTimeout(5, lastUsedPack, modpacks, ansi);
+            System.out.println("Which modpack? [1-" + modpacks.length + "] ");
+
+            stringChoice = getModpackSelectionWithTimeout(10, "> ", lastUsedPack, modpacks, ansi);
             choice = Integer.parseInt(stringChoice);
 
             // Write last used modpack if changed
@@ -251,7 +253,7 @@ public class Main {
         }
     }
 
-    public String getModpackSelectionWithTimeout(int delay, int defaultChoice, String[] modpacks, boolean ansi){
+    public String getModpackSelectionWithTimeout(int delay, String message, int defaultChoice, String[] modpacks, boolean ansi){
         defaultChoice++;
         Callable<Integer> k = new Callable<Integer>() {
             @Override
@@ -264,7 +266,7 @@ public class Main {
         boolean valid;
         ExecutorService l = Executors.newFixedThreadPool(1);
         Future<Integer> g;
-        System.out.print("Which modpack? [1-" + modpacks.length + "] ");
+        System.out.print(message);
         g = l.submit(k);
         done: while (System.currentTimeMillis() - start < delay * 1000L) {
             do {
@@ -285,7 +287,7 @@ public class Main {
                         g = l.submit(k);
                         valid = false;
                         // Reset timer
-                        System.out.print("Which modpack? [1-" + modpacks.length + "] ");
+                        System.out.print(message);
                         start = System.currentTimeMillis();
                     }
                 }
