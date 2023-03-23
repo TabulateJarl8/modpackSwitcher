@@ -37,6 +37,9 @@ Now, all you need to do is set the file that the server executes on start to `sw
 ## Configuration
 When you first run the switcher jar file, if there isn't a file called `mpswconfig.ini` in the current directory, the file will be created with the default values set. There is one option for the last used modpack, you probably won't need to change that as it's changed automatically, and there's an option for the absolute path of the working directory. This is useful if the switcher is incorrectly detecting the directory that you're in. To change this, just set it to the absolute path of the directory containing the `packs` directory.
 
+## EULA
+Modpack Switcher will automatically accept the EULA in two cases. The first case is if `accepteula = true` is present in `mpswconfig.ini`, then the EULA will be accepted automatically when you start a modpack. The other case is if the EULA is already accepted in the `eula.txt` file in the directory of `switcher.jar`. Server hosts will sometimes include an accepted EULA in your working directory on the server (where you put `switcher.jar`), and since we're not running a traditional modpack, Modpack Switcher will transfer this accepted EULA into each of it's modpacks.
+
 ## Download
 
 <a name="artifactDownload"></a>

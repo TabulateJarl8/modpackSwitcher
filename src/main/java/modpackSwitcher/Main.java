@@ -4,7 +4,6 @@ import org.ini4j.Ini;
 
 import java.io.*;
 import java.net.URISyntaxException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -68,7 +67,7 @@ public class Main {
         } catch (IOException e) {
             try {
                 // create file if it doesn't exist
-                if (writeFile("./", "mpswconfig.ini", "[system]\nlastusedpack = 0\nabsoluteworkingdir = " + new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent() + "/") != 0) {
+                if (writeFile("./", "mpswconfig.ini", "[system]\nlastusedpack = 0\naccepteula = false\nabsoluteworkingdir = " + new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "/") != 0) {
                     throw new IOException();
                 } else {
                     config = new Ini(new File("./mpswconfig.ini"));
@@ -188,7 +187,30 @@ public class Main {
                 System.exit(1);
             }
 
+            // accept EULA if the EULA file in the root directory is accepted or if `accepteula` is true in the config file
+            boolean accepteula = false;
+            if (config.get("system", "accepteula").equals("true")) {
+                accepteula = true;
+            }
 
+            // accepteula not true in config file, try checking for eula file in root directory
+            if (!accepteula) {
+                File eulaFile = new File(config.get("system", "absoluteworkingdir") + "/eula.txt");
+                if (eulaFile.exists()) {
+                    String fileContents = readFile(eulaFile.toString());
+                    if (fileContents.replace(" ", "").contains("eula=true")) {
+                        accepteula = true;
+                    }
+                }
+            }
+
+            // if accepting eula, write file
+            if (accepteula) {
+                writeFile(selectedPackDir, "eula.txt", "eula=true");
+            }
+
+
+            // start modpack
             try {
                 System.out.println();
                 System.out.println("Starting " + modpacks[choice] + "...");
